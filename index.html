@@ -82,6 +82,124 @@
             border: 1px solid rgba(var(--color-brown-600-rgb), 0.15);
         }
 
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .formula-container {
+            background: linear-gradient(135deg, rgba(var(--color-teal-500-rgb), 0.05) 0%, rgba(var(--color-teal-500-rgb), 0.02) 100%);
+            border: 2px solid rgba(var(--color-teal-500-rgb), 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .formula-display {
+            font-family: 'Courier New', 'Consolas', monospace;
+            font-size: 18px;
+            line-height: 1.8;
+            text-align: center;
+            color: var(--color-slate-900);
+        }
+
+        .formula-display-compact {
+            font-family: 'Courier New', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            text-align: center;
+            color: var(--color-slate-900);
+        }
+
+        .formula-numerator {
+            border-bottom: 3px solid var(--color-slate-900);
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .formula-numerator-compact {
+            border-bottom: 2px solid var(--color-slate-900);
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            display: inline-block;
+            min-width: fit-content;
+        }
+
+        .formula-denominator {
+            padding-top: 12px;
+            font-weight: 500;
+        }
+
+        .formula-denominator-compact {
+            padding-top: 8px;
+            font-weight: 500;
+            display: inline-block;
+            min-width: fit-content;
+        }
+
+        .formula-result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-teal-500);
+            padding-top: 15px;
+            border-top: 2px dashed rgba(var(--color-teal-500-rgb), 0.3);
+        }
+
+        .formula-result-compact {
+            margin-top: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--color-teal-500);
+            padding-top: 10px;
+            border-top: 2px dashed rgba(var(--color-teal-500-rgb), 0.3);
+        }
+
+        .formula-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .formula-compact-container {
+            background: rgba(var(--color-teal-500-rgb), 0.05);
+            border: 1px solid rgba(var(--color-teal-500-rgb), 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .live-formula {
+            background: linear-gradient(135deg, rgba(var(--color-teal-500-rgb), 0.15) 0%, rgba(var(--color-teal-500-rgb), 0.08) 100%);
+            border: 2px solid var(--color-teal-500);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 6px 25px rgba(var(--color-teal-500-rgb), 0.15);
+        }
+
+        .live-formula-label {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--color-teal-500);
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
         .control-group {
             margin-bottom: 25px;
         }
@@ -107,6 +225,7 @@
             background: rgba(var(--color-brown-600-rgb), 0.2);
             outline: none;
             -webkit-appearance: none;
+            appearance: none;
         }
 
         input[type="range"]::-webkit-slider-thumb {
@@ -179,6 +298,13 @@
             padding: 24px;
             border-radius: 12px;
             border: 1px solid rgba(var(--color-brown-600-rgb), 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: rgba(var(--color-teal-500-rgb), 0.3);
         }
 
         .metric-label {
@@ -348,6 +474,20 @@
             display: block;
         }
 
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .formula-wrapper {
+                flex-direction: column;
+            }
+
+            .metrics-grid[style*="grid-template-columns: repeat(2, 1fr)"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
         @media (max-width: 768px) {
             .metrics-grid {
                 grid-template-columns: 1fr;
@@ -373,6 +513,14 @@
             th, td {
                 padding: 8px;
             }
+
+            .formula-display-compact {
+                font-size: 12px;
+            }
+
+            .formula-compact-container {
+                min-width: 100%;
+            }
         }
     </style>
 </head>
@@ -380,158 +528,203 @@
     <div class="container">
         <div class="header">
             <h1>🎬 VOD Bandwidth & Cost Calculator</h1>
-            <p>Interactive Dashboard for Real-Time Bandwidth & CDN Cost Analysis</p>
+            <p>Interactive Dashboard for Real-Time Bandwidth & Platform Cost Analysis</p>
         </div>
 
-        <div class="controls-section">
-            <h2 style="margin-bottom: 20px;">Adjust Parameters</h2>
-            
-            <div class="control-group">
-                <label>Video Size per Hour (MB)</label>
-                <div class="slider-container">
-                    <input type="range" id="videoSize" min="50" max="3000" value="200" step="10">
-                    <div class="value-display" id="videoSizeValue">200 MB/hr</div>
+        <div class="main-layout">
+            <div class="controls-section">
+                <h2 style="margin-bottom: 25px; color: var(--color-slate-900); font-size: 24px;">⚙️ Adjust Parameters</h2>
+                
+                <div class="control-group">
+                    <label style="font-size: 15px; margin-bottom: 12px;">Video Size per Hour (MB)</label>
+                    <div class="slider-container">
+                        <input type="range" id="videoSize" min="80" max="1000" value="200" step="10">
+                        <div class="value-display" id="videoSizeValue">200 MB/hr</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: var(--color-slate-500);">
+                        <span>80 MB</span>
+                        <span>1000 MB</span>
+                    </div>
+                    <div style="margin-top: 20px; padding: 12px; background: rgba(var(--color-teal-500-rgb), 0.08); border-radius: 8px; border-left: 3px solid var(--color-teal-500);">
+                        <button id="resetTo200Btn" class="quality-btn active" style="margin: 0; width: 100%; justify-content: center; cursor: pointer;">Current: 200 MB (Fixed)</button>
+                    </div>
                 </div>
-                <div class="quality-buttons">
-                    <button class="quality-btn" data-size="200">Current (200 MB)</button>
-                    <button class="quality-btn" data-size="315">SD 480p (315 MB)</button>
-                    <button class="quality-btn" data-size="600">SD+ (600 MB)</button>
-                    <button class="quality-btn" data-size="1125">HD 720p (1125 MB)</button>
-                    <button class="quality-btn" data-size="2250">Full HD 1080p (2250 MB)</button>
-                    <button class="quality-btn" data-size="11250">4K UHD (11250 MB)</button>
+
+                <div class="control-group" style="margin-top: 30px;">
+                    <label style="font-size: 15px; margin-bottom: 12px;">Growth Multiplier</label>
+                    <div class="slider-container">
+                        <input type="range" id="growthMultiplier" min="1" max="5" value="1" step="0.1">
+                        <div class="value-display" id="growthValue">1.0×</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: var(--color-slate-500);">
+                        <span>1×</span>
+                        <span>5×</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <strong style="font-size: 14px; color: var(--color-slate-900);">📐 Bandwidth Calculation Formula</strong>
+                    </div>
+                    <div class="formula-wrapper">
+                        <div class="formula-compact-container">
+                            <div class="formula-display-compact">
+                                <div style="margin-bottom: 10px; font-weight: 700; font-size: 16px;">Bandwidth (TB) =</div>
+                                <div class="formula-numerator-compact">
+                                    Watch Hours × Video Size (MB/hour)
+                                </div>
+                                <div class="formula-division-line"></div>
+                                <div class="formula-denominator-compact">
+                                    1024 MB/GB × 1024 GB/TB
+                                </div>
+                            </div>
+                        </div>
+                        <div class="formula-compact-container" style="background: rgba(var(--color-teal-500-rgb), 0.1); border-color: var(--color-teal-500);">
+                            <div style="text-align: center; margin-bottom: 10px;">
+                                <strong style="font-size: 12px; color: var(--color-teal-500); text-transform: uppercase; letter-spacing: 0.5px;">Live Calculation (30 Days)</strong>
+                            </div>
+                            <div class="formula-display-compact">
+                                <div class="formula-numerator-compact">
+                                    <span id="formulaWatchHours" style="color: var(--color-teal-500); font-weight: 700;">74,843</span> × <span id="formulaVideoSize" style="color: var(--color-teal-500); font-weight: 700;">200</span> MB
+                                </div>
+                                <div class="formula-division-line-teal"></div>
+                                <div class="formula-denominator-compact" style="color: var(--color-slate-500);">
+                                    1,048,576
+                                </div>
+                                <div class="formula-result-compact">
+                                    = <span id="formulaResult">14.28</span> TB
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="control-group">
-                <label>Growth Multiplier</label>
-                <div class="slider-container">
-                    <input type="range" id="growthMultiplier" min="1" max="5" value="3" step="0.1">
-                    <div class="value-display" id="growthValue">3.0×</div>
+            <div class="controls-section">
+                <h2 style="margin-bottom: 25px; color: var(--color-slate-900); font-size: 24px;">📊 Real-Time Bandwidth Metrics</h2>
+                
+                <div class="tabs" style="margin-bottom: 25px;">
+                    <button class="tab active" data-tab="current">Current Scale</button>
+                    <button class="tab" data-tab="future">Future Scale</button>
+                    <button class="tab" data-tab="comparison">Quality Comparison</button>
+                </div>
+
+                <div id="currentTab" class="tab-content active">
+                    <div class="metrics-grid" style="grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        <div class="metric-card" style="background: linear-gradient(135deg, rgba(var(--color-teal-500-rgb), 0.1) 0%, rgba(var(--color-teal-500-rgb), 0.05) 100%); border: 2px solid rgba(var(--color-teal-500-rgb), 0.2); padding: 18px;">
+                            <div class="metric-label" style="font-size: 12px;">30-Day Bandwidth</div>
+                            <div class="metric-value" id="bandwidth30" style="font-size: 24px; margin: 8px 0;">14.28 TB</div>
+                            <div class="metric-subtext" style="font-size: 11px;">74,843 watch hours</div>
+                        </div>
+                        <div class="metric-card" style="padding: 18px;">
+                            <div class="metric-label" style="font-size: 12px;">90-Day Bandwidth</div>
+                            <div class="metric-value" id="bandwidth90" style="font-size: 24px; margin: 8px 0;">39.79 TB</div>
+                            <div class="metric-subtext" style="font-size: 11px;">208,634 watch hours</div>
+                        </div>
+                        <div class="metric-card" style="padding: 18px;">
+                            <div class="metric-label" style="font-size: 12px;">Annual Bandwidth</div>
+                            <div class="metric-value" id="bandwidthYear" style="font-size: 24px; margin: 8px 0;">141.76 TB</div>
+                            <div class="metric-subtext" style="font-size: 11px;">743,221 watch hours</div>
+                        </div>
+                        <div class="metric-card" style="padding: 18px;">
+                            <div class="metric-label" style="font-size: 12px;">Monthly Average</div>
+                            <div class="metric-value" id="monthlyAvg" style="font-size: 24px; margin: 8px 0;">11.81 TB</div>
+                            <div class="metric-subtext" style="font-size: 11px;">Based on annual data</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="futureTab" class="tab-content">
+                    <div class="metrics-grid" style="grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        <div class="metric-card" style="background: linear-gradient(135deg, rgba(var(--color-teal-500-rgb), 0.1) 0%, rgba(var(--color-teal-500-rgb), 0.05) 100%); border: 2px solid rgba(var(--color-teal-500-rgb), 0.2); padding: 18px;">
+                            <div class="metric-label" style="font-size: 12px;">Future 30-Day Bandwidth</div>
+                            <div class="metric-value" id="futureBandwidth30" style="font-size: 24px; margin: 8px 0;">42.83 TB</div>
+                            <div class="metric-subtext" style="font-size: 11px;">With <span id="futureMultiplier1">3.0×</span> growth</div>
+                        </div>
+                        <div class="metric-card" style="padding: 18px;">
+                            <div class="metric-label" style="font-size: 12px;">Future 90-Day Bandwidth</div>
+                            <div class="metric-value" id="futureBandwidth90" style="font-size: 24px; margin: 8px 0;">119.38 TB</div>
+                            <div class="metric-subtext" style="font-size: 11px;">With <span id="futureMultiplier2">3.0×</span> growth</div>
+                        </div>
+                        <div class="metric-card" style="padding: 18px;">
+                            <div class="metric-label" style="font-size: 12px;">Future Annual Bandwidth</div>
+                            <div class="metric-value" id="futureBandwidthYear" style="font-size: 24px; margin: 8px 0;">425.27 TB</div>
+                            <div class="metric-subtext" style="font-size: 11px;">With <span id="futureMultiplier3">3.0×</span> growth</div>
+                        </div>
+                        <div class="metric-card" style="padding: 18px;">
+                            <div class="metric-label" style="font-size: 12px;">Future Monthly Average</div>
+                            <div class="metric-value" id="futureMonthlyAvg" style="font-size: 24px; margin: 8px 0;">35.44 TB</div>
+                            <div class="metric-subtext" style="font-size: 11px;">Based on annual projection</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="comparisonTab" class="tab-content">
+                    <div class="chart-container">
+                        <h2>Bandwidth Consumption by Video Quality (30 Days)</h2>
+                        <div class="bar-chart" id="qualityChart">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="comparison-section">
+                        <h2>Quality vs Cost Analysis</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Video Quality</th>
+                                    <th>Bitrate</th>
+                                    <th>MB/Hour</th>
+                                    <th>30-Day Bandwidth</th>
+                                    <th>Annual Bandwidth</th>
+                                    <th>vs Current</th>
+                                </tr>
+                            </thead>
+                            <tbody id="qualityComparisonTable">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="tabs">
-            <button class="tab active" data-tab="current">Current Scale</button>
-            <button class="tab" data-tab="future">Future Scale (3×)</button>
-            <button class="tab" data-tab="comparison">Quality Comparison</button>
-        </div>
-
-        <div id="currentTab" class="tab-content active">
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-label">30-Day Bandwidth</div>
-                    <div class="metric-value" id="bandwidth30">14.28 TB</div>
-                    <div class="metric-subtext">74,843 watch hours</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">90-Day Bandwidth</div>
-                    <div class="metric-value" id="bandwidth90">39.79 TB</div>
-                    <div class="metric-subtext">208,634 watch hours</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Annual Bandwidth</div>
-                    <div class="metric-value" id="bandwidthYear">141.76 TB</div>
-                    <div class="metric-subtext">743,221 watch hours</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Monthly Average</div>
-                    <div class="metric-value" id="monthlyAvg">11.81 TB</div>
-                    <div class="metric-subtext">Based on annual data</div>
-                </div>
-            </div>
-
-            <div class="comparison-section">
-                <h2>CDN Cost Comparison (Current Scale)</h2>
-                <table class="cost-table">
-                    <thead>
-                        <tr>
-                            <th>CDN Provider</th>
-                            <th>Cost per TB</th>
-                            <th>Monthly Cost</th>
-                            <th>Annual Cost</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cdnCostTable">
-                        <!-- Populated by JavaScript -->
-                    </tbody>
-                </table>
-                <div class="info-box">
-                    💡 <strong>Tip:</strong> Adjust the video size slider above to see how quality changes affect bandwidth and costs across all CDN providers.
-                </div>
-            </div>
-        </div>
-
-        <div id="futureTab" class="tab-content">
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-label">Future 30-Day Bandwidth</div>
-                    <div class="metric-value" id="futureBandwidth30">42.83 TB</div>
-                    <div class="metric-subtext">With <span id="futureMultiplier1">3.0×</span> growth</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Future 90-Day Bandwidth</div>
-                    <div class="metric-value" id="futureBandwidth90">119.38 TB</div>
-                    <div class="metric-subtext">With <span id="futureMultiplier2">3.0×</span> growth</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Future Annual Bandwidth</div>
-                    <div class="metric-value" id="futureBandwidthYear">425.27 TB</div>
-                    <div class="metric-subtext">With <span id="futureMultiplier3">3.0×</span> growth</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Future Monthly Average</div>
-                    <div class="metric-value" id="futureMonthlyAvg">35.44 TB</div>
-                    <div class="metric-subtext">Based on annual projection</div>
-                </div>
-            </div>
-
-            <div class="comparison-section">
-                <h2>CDN Cost Comparison (Future Scale)</h2>
-                <table class="cost-table">
-                    <thead>
-                        <tr>
-                            <th>CDN Provider</th>
-                            <th>Cost per TB</th>
-                            <th>Monthly Cost</th>
-                            <th>Annual Cost</th>
-                        </tr>
-                    </thead>
-                    <tbody id="futureCdnCostTable">
-                        <!-- Populated by JavaScript -->
-                    </tbody>
-                </table>
-                <div class="info-box">
-                    📈 <strong>Growth Scenario:</strong> These projections assume <span id="growthScenario">3.0×</span> increase in both active users and watch time. Adjust the growth multiplier above to model different scenarios.
-                </div>
-            </div>
-        </div>
-
-        <div id="comparisonTab" class="tab-content">
-            <div class="chart-container">
-                <h2>Bandwidth Consumption by Video Quality (30 Days)</h2>
-                <div class="bar-chart" id="qualityChart">
+        <div class="comparison-section" style="margin-top: 30px;">
+            <h2>Platform Cost Comparison (Current Scale)</h2>
+            <table class="cost-table">
+                <thead>
+                    <tr>
+                        <th>Platform</th>
+                        <th>Plan Details</th>
+                        <th>Monthly Cost</th>
+                        <th>Annual Cost</th>
+                    </tr>
+                </thead>
+                <tbody id="cdnCostTable">
                     <!-- Populated by JavaScript -->
-                </div>
+                </tbody>
+            </table>
+            <div class="info-box">
+                💡 <strong>Tip:</strong> Adjust the video size slider above to see how quality changes affect bandwidth and costs. Gumlet costs include optimization savings (38.78% average).
             </div>
+        </div>
 
-            <div class="comparison-section">
-                <h2>Quality vs Cost Analysis</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Video Quality</th>
-                            <th>Bitrate</th>
-                            <th>MB/Hour</th>
-                            <th>30-Day Bandwidth</th>
-                            <th>Annual Bandwidth</th>
-                            <th>vs Current</th>
-                        </tr>
-                    </thead>
-                    <tbody id="qualityComparisonTable">
-                        <!-- Populated by JavaScript -->
-                    </tbody>
-                </table>
+        <div class="comparison-section" style="margin-top: 30px; display: none;" id="futureCostSection">
+            <h2>Platform Cost Comparison (Future Scale)</h2>
+            <table class="cost-table">
+                <thead>
+                    <tr>
+                        <th>Platform</th>
+                        <th>Plan Details</th>
+                        <th>Monthly Cost</th>
+                        <th>Annual Cost</th>
+                    </tr>
+                </thead>
+                <tbody id="futureCdnCostTable">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+            <div class="info-box">
+                📈 <strong>Growth Scenario:</strong> These projections assume <span id="growthScenario">3.0×</span> increase in both active users and watch time. Adjust the growth multiplier above to model different scenarios. Gumlet costs include optimization savings (38.78% average).
             </div>
         </div>
     </div>
@@ -544,27 +737,93 @@
             year: 743221
         };
 
-        const cdnProviders = [
-            { name: 'BlazingCDN', costPerTB: 4 },
-            { name: 'Bunny.net', costPerTB: 10 },
-            { name: 'CDN77', costPerTB: 42.5 },
-            { name: 'Cloudflare', costPerTB: 50 },
-            { name: 'Amazon CloudFront', costPerTB: 52.5 },
-            { name: 'Azure CDN', costPerTB: 52.5 },
-            { name: 'Akamai', costPerTB: 60 }
-        ];
+        // Gumlet optimization percentage (average from data)
+        const GUMLET_OPTIMIZATION_PERCENT = 38.78; // Average optimization percentage
 
-        const qualityPresets = [
-            { name: 'Current', mbPerHour: 200, bitrate: '0.44 Mbps' },
-            { name: 'SD 480p', mbPerHour: 315, bitrate: '0.70 Mbps' },
-            { name: 'SD+', mbPerHour: 600, bitrate: '1.33 Mbps' },
-            { name: 'HD 720p', mbPerHour: 1125, bitrate: '2.50 Mbps' },
-            { name: 'Full HD 1080p', mbPerHour: 2250, bitrate: '5.00 Mbps' },
-            { name: '4K UHD', mbPerHour: 11250, bitrate: '25.0 Mbps' }
+        // Platform pricing configurations
+        const platforms = [
+            {
+                name: 'Gumlet',
+                tier: 'Tier 1',
+                type: 'gumlet',
+                fixedMonthly: 1300,
+                includedBandwidthTB: 20,
+                includedCostPerGB: 0.04,
+                payAsYouGoCostPerGB: 0.04
+            },
+            {
+                name: 'Gumlet',
+                tier: 'Tier 2',
+                type: 'gumlet',
+                fixedMonthly: 2300,
+                includedBandwidthTB: 60,
+                includedCostPerGB: 0.03,
+                payAsYouGoCostPerGB: 0.025
+            },
+            {
+                name: 'VdoCipher',
+                tier: '10 TB Plan',
+                type: 'vdocipher',
+                annualCost: 800,
+                bandwidthTB: 10,
+                costPerGB: 0.08
+            },
+            {
+                name: 'VdoCipher',
+                tier: '25 TB Plan',
+                type: 'vdocipher',
+                annualCost: 2000,
+                bandwidthTB: 25,
+                costPerGB: 0.08
+            },
+            {
+                name: 'VdoCipher',
+                tier: '50 TB Plan',
+                type: 'vdocipher',
+                annualCost: 3500,
+                bandwidthTB: 50,
+                costPerGB: 0.07
+            },
+            {
+                name: 'VdoCipher',
+                tier: '100 TB Plan',
+                type: 'vdocipher',
+                annualCost: 6000,
+                bandwidthTB: 100,
+                costPerGB: 0.06
+            },
+            {
+                name: 'VdoCipher',
+                tier: '300 TB Plan',
+                type: 'vdocipher',
+                annualCost: 15000,
+                bandwidthTB: 300,
+                costPerGB: 0.05
+            },
+            {
+                name: 'VdoCipher',
+                tier: '500 TB Plan',
+                type: 'vdocipher',
+                annualCost: 20000,
+                bandwidthTB: 500,
+                costPerGB: 0.04
+            },
+            {
+                name: 'Vimeo',
+                tier: 'Base Plan',
+                type: 'vimeo',
+                costPerTB: 80
+            },
+            {
+                name: 'Vimeo',
+                tier: 'Overage',
+                type: 'vimeo',
+                costPerTB: 120
+            }
         ];
 
         let currentVideoSize = 200;
-        let currentGrowthMultiplier = 3.0;
+        let currentGrowthMultiplier = 1.0;
 
         // Calculate bandwidth in TB
         function calculateBandwidth(watchHours, mbPerHour) {
@@ -574,10 +833,71 @@
             return totalTB;
         }
 
+        // Calculate optimized bandwidth for Gumlet (using percentage-based optimization)
+        function calculateOptimizedBandwidth(originalBandwidthTB) {
+            // Optimization reduces bandwidth by 38.78%, so optimized = original * (1 - 0.3878)
+            return originalBandwidthTB * (1 - GUMLET_OPTIMIZATION_PERCENT / 100);
+        }
+
+        // Calculate platform costs
+        function calculatePlatformCost(platform, monthlyBandwidthTB) {
+            let monthlyCost = 0;
+            let planDetails = '';
+
+            if (platform.type === 'gumlet') {
+                // Always apply optimization to bandwidth for Gumlet (38.78% average reduction)
+                const effectiveBandwidthTB = calculateOptimizedBandwidth(monthlyBandwidthTB);
+                
+                monthlyCost = platform.fixedMonthly;
+                const effectiveBandwidthGB = effectiveBandwidthTB * 1024;
+                const includedBandwidthGB = platform.includedBandwidthTB * 1024;
+                
+                if (effectiveBandwidthGB <= includedBandwidthGB) {
+                    // Within included bandwidth
+                    const includedCost = effectiveBandwidthGB * platform.includedCostPerGB;
+                    monthlyCost += includedCost;
+                    planDetails = `Fixed: $${platform.fixedMonthly.toFixed(0)} + ${formatNumber(effectiveBandwidthTB, 2)} TB @ $${platform.includedCostPerGB.toFixed(2)}/GB`;
+                } else {
+                    // Exceeds included bandwidth
+                    const includedCost = includedBandwidthGB * platform.includedCostPerGB;
+                    const overageGB = effectiveBandwidthGB - includedBandwidthGB;
+                    const overageCost = overageGB * platform.payAsYouGoCostPerGB;
+                    monthlyCost += includedCost + overageCost;
+                    planDetails = `Fixed: $${platform.fixedMonthly.toFixed(0)} + ${platform.includedBandwidthTB}TB included + ${formatNumber((overageGB / 1024), 2)} TB overage @ $${platform.payAsYouGoCostPerGB.toFixed(3)}/GB`;
+                }
+                
+                planDetails += ` (Optimized: ${GUMLET_OPTIMIZATION_PERCENT.toFixed(2)}% reduction)`;
+            } else if (platform.type === 'vdocipher') {
+                // VdoCipher: Calculate cost based on plan
+                const annualBandwidthTB = monthlyBandwidthTB * 12;
+                
+                if (annualBandwidthTB <= platform.bandwidthTB) {
+                    // Within plan - use plan cost
+                    monthlyCost = platform.annualCost / 12;
+                    planDetails = `${platform.bandwidthTB} TB/year plan (using ${formatNumber(annualBandwidthTB, 2)} TB)`;
+                } else {
+                    // Exceeds plan - calculate based on actual usage at plan rate
+                    monthlyCost = (annualBandwidthTB * 1024 * platform.costPerGB) / 12;
+                    planDetails = `${formatNumber(annualBandwidthTB, 2)} TB/year @ $${platform.costPerGB.toFixed(2)}/GB (exceeds ${platform.bandwidthTB} TB plan)`;
+                }
+            } else if (platform.type === 'vimeo') {
+                // Vimeo: Simple per-TB pricing
+                monthlyCost = monthlyBandwidthTB * platform.costPerTB;
+                planDetails = `$${platform.costPerTB}/TB`;
+            }
+
+            return {
+                monthly: monthlyCost,
+                annual: monthlyCost * 12,
+                details: planDetails
+            };
+        }
+
         // Format number with commas and decimals
         function formatNumber(num, decimals = 2) {
             return num.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
+
 
         // Update all calculations
         function updateCalculations() {
@@ -585,6 +905,15 @@
             const bandwidth90 = calculateBandwidth(watchHours.days90, currentVideoSize);
             const bandwidthYear = calculateBandwidth(watchHours.year, currentVideoSize);
             const monthlyAvg = bandwidthYear / 12;
+
+            // Calculate watch hours based on growth multiplier for formula display
+            const adjustedWatchHours = watchHours.days30 * currentGrowthMultiplier;
+            const adjustedBandwidth30 = calculateBandwidth(adjustedWatchHours, currentVideoSize);
+            
+            // Update formula display with real-time values (adjusted by growth multiplier)
+            document.getElementById('formulaWatchHours').textContent = formatNumber(adjustedWatchHours, 0);
+            document.getElementById('formulaVideoSize').textContent = currentVideoSize;
+            document.getElementById('formulaResult').textContent = formatNumber(adjustedBandwidth30, 2);
 
             // Update current scale metrics
             document.getElementById('bandwidth30').textContent = formatNumber(bandwidth30) + ' TB';
@@ -618,24 +947,40 @@
             updateQualityChart();
         }
 
-        // Update CDN cost table
+        // Update platform cost table
         function updateCDNTable(annualTB, tableId) {
             const tbody = document.getElementById(tableId);
             tbody.innerHTML = '';
 
-            cdnProviders.forEach(provider => {
-                const annualCost = annualTB * provider.costPerTB;
-                const monthlyCost = annualCost / 12;
+            const monthlyTB = annualTB / 12;
+            const costs = [];
 
+            platforms.forEach(platform => {
+                const costData = calculatePlatformCost(platform, monthlyTB);
+                costs.push({
+                    platform: platform,
+                    cost: costData,
+                    displayName: `${platform.name}${platform.tier ? ' - ' + platform.tier : ''}`
+                });
+            });
+
+            // Sort by annual cost
+            costs.sort((a, b) => a.cost.annual - b.cost.annual);
+
+            // Find best and worst
+            const bestCost = costs[0].cost.annual;
+            const worstCost = costs[costs.length - 1].cost.annual;
+
+            costs.forEach((item, index) => {
                 const row = document.createElement('tr');
-                const isLowest = provider.costPerTB === Math.min(...cdnProviders.map(p => p.costPerTB));
-                const isHighest = provider.costPerTB === Math.max(...cdnProviders.map(p => p.costPerTB));
+                const isBest = item.cost.annual === bestCost && index === 0;
+                const isWorst = item.cost.annual === worstCost && index === costs.length - 1;
 
                 row.innerHTML = `
-                    <td class="${isLowest ? 'cdn-best' : isHighest ? 'cdn-worst' : ''}">${provider.name}</td>
-                    <td>$${provider.costPerTB}</td>
-                    <td>$${formatNumber(monthlyCost)}</td>
-                    <td>$${formatNumber(annualCost)}</td>
+                    <td class="${isBest ? 'cdn-best' : isWorst ? 'cdn-worst' : ''}">${item.displayName}</td>
+                    <td style="font-size: 12px;">${item.cost.details}</td>
+                    <td>$${formatNumber(item.cost.monthly)}</td>
+                    <td>$${formatNumber(item.cost.annual)}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -646,25 +991,22 @@
             const tbody = document.getElementById('qualityComparisonTable');
             tbody.innerHTML = '';
 
-            qualityPresets.forEach((preset, index) => {
-                const bandwidth30 = calculateBandwidth(watchHours.days30, preset.mbPerHour);
-                const bandwidthYear = calculateBandwidth(watchHours.year, preset.mbPerHour);
-                const multiplier = preset.mbPerHour / 200;
+            // Show current video size only
+            const bandwidth30 = calculateBandwidth(watchHours.days30, currentVideoSize);
+            const bandwidthYear = calculateBandwidth(watchHours.year, currentVideoSize);
+            const mbps = (currentVideoSize * 8) / 3600;
 
-                const row = document.createElement('tr');
-                const isCurrent = preset.mbPerHour === currentVideoSize;
-                
-                row.className = isCurrent ? 'highlight-row' : '';
-                row.innerHTML = `
-                    <td>${preset.name}${isCurrent ? ' ← Current' : ''}</td>
-                    <td>${preset.bitrate}</td>
-                    <td>${preset.mbPerHour} MB</td>
-                    <td>${formatNumber(bandwidth30)} TB</td>
-                    <td>${formatNumber(bandwidthYear)} TB</td>
-                    <td>${formatNumber(multiplier, 1)}×</td>
-                `;
-                tbody.appendChild(row);
-            });
+            const row = document.createElement('tr');
+            row.className = 'highlight-row';
+            row.innerHTML = `
+                <td>Current</td>
+                <td>${mbps.toFixed(2)} Mbps</td>
+                <td>${currentVideoSize} MB</td>
+                <td>${formatNumber(bandwidth30)} TB</td>
+                <td>${formatNumber(bandwidthYear)} TB</td>
+                <td>1.00×</td>
+            `;
+            tbody.appendChild(row);
         }
 
         // Update quality chart
@@ -672,38 +1014,23 @@
             const container = document.getElementById('qualityChart');
             container.innerHTML = '';
 
-            const maxBandwidth = calculateBandwidth(watchHours.days30, 11250); // 4K as max
+            const bandwidth = calculateBandwidth(watchHours.days30, currentVideoSize);
 
-            qualityPresets.forEach(preset => {
-                const bandwidth = calculateBandwidth(watchHours.days30, preset.mbPerHour);
-                const percentage = (bandwidth / maxBandwidth) * 100;
-                const isCurrent = preset.mbPerHour === currentVideoSize;
-
-                const barRow = document.createElement('div');
-                barRow.className = 'bar-row';
-                barRow.innerHTML = `
-                    <div class="bar-label">${preset.name}${isCurrent ? ' ★' : ''}</div>
-                    <div class="bar-container">
-                        <div class="bar-fill" style="width: ${percentage}%">${formatNumber(bandwidth)} TB</div>
-                    </div>
-                `;
-                container.appendChild(barRow);
-            });
+            const barRow = document.createElement('div');
+            barRow.className = 'bar-row';
+            barRow.innerHTML = `
+                <div class="bar-label">Current (${currentVideoSize} MB/hr) ★</div>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: 100%">${formatNumber(bandwidth)} TB</div>
+                </div>
+            `;
+            container.appendChild(barRow);
         }
 
         // Event listeners
         document.getElementById('videoSize').addEventListener('input', (e) => {
             currentVideoSize = parseInt(e.target.value);
             document.getElementById('videoSizeValue').textContent = currentVideoSize + ' MB/hr';
-            
-            // Update quality button states
-            document.querySelectorAll('.quality-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (parseInt(btn.dataset.size) === currentVideoSize) {
-                    btn.classList.add('active');
-                }
-            });
-            
             updateCalculations();
         });
 
@@ -713,19 +1040,12 @@
             updateCalculations();
         });
 
-        // Quality preset buttons
-        document.querySelectorAll('.quality-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const size = parseInt(btn.dataset.size);
-                currentVideoSize = size;
-                document.getElementById('videoSize').value = size;
-                document.getElementById('videoSizeValue').textContent = size + ' MB/hr';
-                
-                document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                updateCalculations();
-            });
+        // Reset to 200MB button
+        document.getElementById('resetTo200Btn').addEventListener('click', () => {
+            currentVideoSize = 200;
+            document.getElementById('videoSize').value = 200;
+            document.getElementById('videoSizeValue').textContent = '200 MB/hr';
+            updateCalculations();
         });
 
         // Tab switching
@@ -733,11 +1053,34 @@
             tab.addEventListener('click', () => {
                 const tabName = tab.dataset.tab;
                 
+                // Remove active from all tabs and tab contents
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 
+                // Add active to clicked tab and corresponding content
                 tab.classList.add('active');
-                document.getElementById(tabName + 'Tab').classList.add('active');
+                const tabContent = document.getElementById(tabName + 'Tab');
+                if (tabContent) {
+                    tabContent.classList.add('active');
+                }
+                
+                // Show/hide cost sections based on tab
+                const costSections = document.querySelectorAll('.comparison-section');
+                const futureCostSection = document.getElementById('futureCostSection');
+                
+                if (tabName === 'current') {
+                    // Show first cost section (current scale)
+                    if (costSections[0]) costSections[0].style.display = 'block';
+                    if (futureCostSection) futureCostSection.style.display = 'none';
+                } else if (tabName === 'future') {
+                    // Show future cost section
+                    if (costSections[0]) costSections[0].style.display = 'none';
+                    if (futureCostSection) futureCostSection.style.display = 'block';
+                } else {
+                    // Hide both cost sections for comparison tab
+                    costSections.forEach(section => section.style.display = 'none');
+                    if (futureCostSection) futureCostSection.style.display = 'none';
+                }
             });
         });
 
