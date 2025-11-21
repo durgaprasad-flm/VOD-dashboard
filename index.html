@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOD Bandwidth & Cost Calculator - Interactive Dashboard</title>
+    <style>
+        :root {
+            --color-cream-50: rgba(252, 252, 249, 1);
+            --color-cream-100: rgba(255, 255, 253, 1);
+            --color-slate-900: rgba(19, 52, 59, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
+            --color-teal-500: rgba(33, 128, 141, 1);
+            --color-teal-600: rgba(29, 116, 128, 1);
+            --color-brown-600-rgb: 94, 82, 64;
+            --color-teal-500-rgb: 33, 128, 141;
+            --color-charcoal-700: rgba(31, 33, 33, 1);
+            --color-charcoal-800: rgba(38, 40, 40, 1);
+            --color-gray-200: rgba(245, 245, 245, 1);
+            --color-gray-300: rgba(167, 169, 169, 1);
+            --color-gray-400-rgb: 119, 124, 124;
+            --color-teal-300: rgba(50, 184, 198, 1);
+            --color-teal-300-rgb: 50, 184, 198;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-cream-50: var(--color-charcoal-700);
+                --color-cream-100: var(--color-charcoal-800);
+                --color-slate-900: var(--color-gray-200);
+                --color-slate-500: rgba(var(--color-gray-300), 0.7);
+                --color-teal-500: var(--color-teal-300);
+                --color-teal-600: var(--color-teal-300);
+                --color-brown-600-rgb: var(--color-gray-400-rgb);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--color-cream-50);
+            color: var(--color-slate-900);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: var(--color-cream-100);
+            border-radius: 12px;
+            border: 1px solid rgba(var(--color-brown-600-rgb), 0.15);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: var(--color-slate-900);
+        }
+
+        .header p {
+            color: var(--color-slate-500);
+            font-size: 16px;
+        }
+
+        .controls-section {
+            background: var(--color-cream-100);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(var(--color-brown-600-rgb), 0.15);
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--color-slate-900);
+            font-size: 14px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(var(--color-brown-600-rgb), 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--color-teal-500);
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--color-teal-500);
+            cursor: pointer;
+            border: none;
+        }
+
+        .value-display {
+            min-width: 120px;
+            padding: 8px 16px;
+            background: rgba(var(--color-teal-500-rgb), 0.1);
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+            color: var(--color-teal-500);
+        }
+
+        .quality-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .quality-btn {
+            padding: 8px 16px;
+            border: 1px solid rgba(var(--color-brown-600-rgb), 0.3);
+            background: var(--color-cream-100);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            color: var(--color-slate-900);
+        }
+
+        .quality-btn:hover {
+            background: rgba(var(--color-teal-500-rgb), 0.1);
+            border-color: var(--color-teal-500);
+        }
+
+        .quality-btn.active {
+            background: var(--color-teal-500);
+            color: white;
+            border-color: var(--color-teal-500);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: var(--color-cream-100);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(var(--color-brown-600-rgb), 0.15);
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: var(--color-slate-500);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--color-teal-500);
+            margin-bottom: 5px;
+        }
+
+        .metric-subtext {
+            font-size: 12px;
+            color: var(--color-slate-500);
+        }
+
+        .comparison-section {
+            background: var(--color-cream-100);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(var(--color-brown-600-rgb), 0.15);
+        }
+
+        .comparison-section h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--color-slate-900);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(var(--color-brown-600-rgb), 0.1);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--color-slate-900);
+            background: rgba(var(--color-brown-600-rgb), 0.05);
+            font-size: 13px;
+        }
+
+        td {
+            color: var(--color-slate-900);
+            font-size: 14px;
+        }
+
+        .highlight-row {
+            background: rgba(var(--color-teal-500-rgb), 0.08);
+            font-weight: 600;
+        }
+
+        .cost-table {
+            margin-top: 20px;
+        }
+
+        .cdn-best {
+            color: #15803d;
+            font-weight: 600;
+        }
+
+        .cdn-worst {
+            color: #991b1b;
+        }
+
+        .info-box {
+            background: rgba(var(--color-teal-500-rgb), 0.1);
+            border-left: 4px solid var(--color-teal-500);
+            padding: 16px;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--color-slate-900);
+        }
+
+        .chart-container {
+            background: var(--color-cream-100);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(var(--color-brown-600-rgb), 0.15);
+        }
+
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .bar-label {
+            min-width: 150px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-slate-900);
+        }
+
+        .bar-container {
+            flex: 1;
+            height: 30px;
+            background: rgba(var(--color-brown-600-rgb), 0.1);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: var(--color-teal-500);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(var(--color-brown-600-rgb), 0.2);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--color-slate-500);
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: var(--color-teal-500);
+            border-bottom-color: var(--color-teal-500);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .slider-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .quality-buttons {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 VOD Bandwidth & Cost Calculator</h1>
+            <p>Interactive Dashboard for Real-Time Bandwidth & CDN Cost Analysis</p>
+        </div>
+
+        <div class="controls-section">
+            <h2 style="margin-bottom: 20px;">Adjust Parameters</h2>
+            
+            <div class="control-group">
+                <label>Video Size per Hour (MB)</label>
+                <div class="slider-container">
+                    <input type="range" id="videoSize" min="50" max="3000" value="200" step="10">
+                    <div class="value-display" id="videoSizeValue">200 MB/hr</div>
+                </div>
+                <div class="quality-buttons">
+                    <button class="quality-btn" data-size="200">Current (200 MB)</button>
+                    <button class="quality-btn" data-size="315">SD 480p (315 MB)</button>
+                    <button class="quality-btn" data-size="600">SD+ (600 MB)</button>
+                    <button class="quality-btn" data-size="1125">HD 720p (1125 MB)</button>
+                    <button class="quality-btn" data-size="2250">Full HD 1080p (2250 MB)</button>
+                    <button class="quality-btn" data-size="11250">4K UHD (11250 MB)</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Growth Multiplier</label>
+                <div class="slider-container">
+                    <input type="range" id="growthMultiplier" min="1" max="5" value="3" step="0.1">
+                    <div class="value-display" id="growthValue">3.0×</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="current">Current Scale</button>
+            <button class="tab" data-tab="future">Future Scale (3×)</button>
+            <button class="tab" data-tab="comparison">Quality Comparison</button>
+        </div>
+
+        <div id="currentTab" class="tab-content active">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">30-Day Bandwidth</div>
+                    <div class="metric-value" id="bandwidth30">14.28 TB</div>
+                    <div class="metric-subtext">74,843 watch hours</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">90-Day Bandwidth</div>
+                    <div class="metric-value" id="bandwidth90">39.79 TB</div>
+                    <div class="metric-subtext">208,634 watch hours</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Annual Bandwidth</div>
+                    <div class="metric-value" id="bandwidthYear">141.76 TB</div>
+                    <div class="metric-subtext">743,221 watch hours</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Monthly Average</div>
+                    <div class="metric-value" id="monthlyAvg">11.81 TB</div>
+                    <div class="metric-subtext">Based on annual data</div>
+                </div>
+            </div>
+
+            <div class="comparison-section">
+                <h2>CDN Cost Comparison (Current Scale)</h2>
+                <table class="cost-table">
+                    <thead>
+                        <tr>
+                            <th>CDN Provider</th>
+                            <th>Cost per TB</th>
+                            <th>Monthly Cost</th>
+                            <th>Annual Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cdnCostTable">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+                <div class="info-box">
+                    💡 <strong>Tip:</strong> Adjust the video size slider above to see how quality changes affect bandwidth and costs across all CDN providers.
+                </div>
+            </div>
+        </div>
+
+        <div id="futureTab" class="tab-content">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Future 30-Day Bandwidth</div>
+                    <div class="metric-value" id="futureBandwidth30">42.83 TB</div>
+                    <div class="metric-subtext">With <span id="futureMultiplier1">3.0×</span> growth</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Future 90-Day Bandwidth</div>
+                    <div class="metric-value" id="futureBandwidth90">119.38 TB</div>
+                    <div class="metric-subtext">With <span id="futureMultiplier2">3.0×</span> growth</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Future Annual Bandwidth</div>
+                    <div class="metric-value" id="futureBandwidthYear">425.27 TB</div>
+                    <div class="metric-subtext">With <span id="futureMultiplier3">3.0×</span> growth</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Future Monthly Average</div>
+                    <div class="metric-value" id="futureMonthlyAvg">35.44 TB</div>
+                    <div class="metric-subtext">Based on annual projection</div>
+                </div>
+            </div>
+
+            <div class="comparison-section">
+                <h2>CDN Cost Comparison (Future Scale)</h2>
+                <table class="cost-table">
+                    <thead>
+                        <tr>
+                            <th>CDN Provider</th>
+                            <th>Cost per TB</th>
+                            <th>Monthly Cost</th>
+                            <th>Annual Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody id="futureCdnCostTable">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+                <div class="info-box">
+                    📈 <strong>Growth Scenario:</strong> These projections assume <span id="growthScenario">3.0×</span> increase in both active users and watch time. Adjust the growth multiplier above to model different scenarios.
+                </div>
+            </div>
+        </div>
+
+        <div id="comparisonTab" class="tab-content">
+            <div class="chart-container">
+                <h2>Bandwidth Consumption by Video Quality (30 Days)</h2>
+                <div class="bar-chart" id="qualityChart">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="comparison-section">
+                <h2>Quality vs Cost Analysis</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Video Quality</th>
+                            <th>Bitrate</th>
+                            <th>MB/Hour</th>
+                            <th>30-Day Bandwidth</th>
+                            <th>Annual Bandwidth</th>
+                            <th>vs Current</th>
+                        </tr>
+                    </thead>
+                    <tbody id="qualityComparisonTable">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base data from actual analytics
+        const watchHours = {
+            days30: 74843,
+            days90: 208634,
+            year: 743221
+        };
+
+        const cdnProviders = [
+            { name: 'BlazingCDN', costPerTB: 4 },
+            { name: 'Bunny.net', costPerTB: 10 },
+            { name: 'CDN77', costPerTB: 42.5 },
+            { name: 'Cloudflare', costPerTB: 50 },
+            { name: 'Amazon CloudFront', costPerTB: 52.5 },
+            { name: 'Azure CDN', costPerTB: 52.5 },
+            { name: 'Akamai', costPerTB: 60 }
+        ];
+
+        const qualityPresets = [
+            { name: 'Current', mbPerHour: 200, bitrate: '0.44 Mbps' },
+            { name: 'SD 480p', mbPerHour: 315, bitrate: '0.70 Mbps' },
+            { name: 'SD+', mbPerHour: 600, bitrate: '1.33 Mbps' },
+            { name: 'HD 720p', mbPerHour: 1125, bitrate: '2.50 Mbps' },
+            { name: 'Full HD 1080p', mbPerHour: 2250, bitrate: '5.00 Mbps' },
+            { name: '4K UHD', mbPerHour: 11250, bitrate: '25.0 Mbps' }
+        ];
+
+        let currentVideoSize = 200;
+        let currentGrowthMultiplier = 3.0;
+
+        // Calculate bandwidth in TB
+        function calculateBandwidth(watchHours, mbPerHour) {
+            const totalMB = watchHours * mbPerHour;
+            const totalGB = totalMB / 1024;
+            const totalTB = totalGB / 1024;
+            return totalTB;
+        }
+
+        // Format number with commas and decimals
+        function formatNumber(num, decimals = 2) {
+            return num.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // Update all calculations
+        function updateCalculations() {
+            const bandwidth30 = calculateBandwidth(watchHours.days30, currentVideoSize);
+            const bandwidth90 = calculateBandwidth(watchHours.days90, currentVideoSize);
+            const bandwidthYear = calculateBandwidth(watchHours.year, currentVideoSize);
+            const monthlyAvg = bandwidthYear / 12;
+
+            // Update current scale metrics
+            document.getElementById('bandwidth30').textContent = formatNumber(bandwidth30) + ' TB';
+            document.getElementById('bandwidth90').textContent = formatNumber(bandwidth90) + ' TB';
+            document.getElementById('bandwidthYear').textContent = formatNumber(bandwidthYear) + ' TB';
+            document.getElementById('monthlyAvg').textContent = formatNumber(monthlyAvg) + ' TB';
+
+            // Update future scale metrics
+            const futureBandwidth30 = bandwidth30 * currentGrowthMultiplier;
+            const futureBandwidth90 = bandwidth90 * currentGrowthMultiplier;
+            const futureBandwidthYear = bandwidthYear * currentGrowthMultiplier;
+            const futureMonthlyAvg = futureBandwidthYear / 12;
+
+            document.getElementById('futureBandwidth30').textContent = formatNumber(futureBandwidth30) + ' TB';
+            document.getElementById('futureBandwidth90').textContent = formatNumber(futureBandwidth90) + ' TB';
+            document.getElementById('futureBandwidthYear').textContent = formatNumber(futureBandwidthYear) + ' TB';
+            document.getElementById('futureMonthlyAvg').textContent = formatNumber(futureMonthlyAvg) + ' TB';
+
+            // Update multiplier displays
+            document.querySelectorAll('[id^="futureMultiplier"]').forEach(el => {
+                el.textContent = formatNumber(currentGrowthMultiplier, 1) + '×';
+            });
+            document.getElementById('growthScenario').textContent = formatNumber(currentGrowthMultiplier, 1) + '×';
+
+            // Update CDN cost tables
+            updateCDNTable(bandwidthYear, 'cdnCostTable');
+            updateCDNTable(futureBandwidthYear, 'futureCdnCostTable');
+
+            // Update quality comparison
+            updateQualityComparison();
+            updateQualityChart();
+        }
+
+        // Update CDN cost table
+        function updateCDNTable(annualTB, tableId) {
+            const tbody = document.getElementById(tableId);
+            tbody.innerHTML = '';
+
+            cdnProviders.forEach(provider => {
+                const annualCost = annualTB * provider.costPerTB;
+                const monthlyCost = annualCost / 12;
+
+                const row = document.createElement('tr');
+                const isLowest = provider.costPerTB === Math.min(...cdnProviders.map(p => p.costPerTB));
+                const isHighest = provider.costPerTB === Math.max(...cdnProviders.map(p => p.costPerTB));
+
+                row.innerHTML = `
+                    <td class="${isLowest ? 'cdn-best' : isHighest ? 'cdn-worst' : ''}">${provider.name}</td>
+                    <td>$${provider.costPerTB}</td>
+                    <td>$${formatNumber(monthlyCost)}</td>
+                    <td>$${formatNumber(annualCost)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Update quality comparison table
+        function updateQualityComparison() {
+            const tbody = document.getElementById('qualityComparisonTable');
+            tbody.innerHTML = '';
+
+            qualityPresets.forEach((preset, index) => {
+                const bandwidth30 = calculateBandwidth(watchHours.days30, preset.mbPerHour);
+                const bandwidthYear = calculateBandwidth(watchHours.year, preset.mbPerHour);
+                const multiplier = preset.mbPerHour / 200;
+
+                const row = document.createElement('tr');
+                const isCurrent = preset.mbPerHour === currentVideoSize;
+                
+                row.className = isCurrent ? 'highlight-row' : '';
+                row.innerHTML = `
+                    <td>${preset.name}${isCurrent ? ' ← Current' : ''}</td>
+                    <td>${preset.bitrate}</td>
+                    <td>${preset.mbPerHour} MB</td>
+                    <td>${formatNumber(bandwidth30)} TB</td>
+                    <td>${formatNumber(bandwidthYear)} TB</td>
+                    <td>${formatNumber(multiplier, 1)}×</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Update quality chart
+        function updateQualityChart() {
+            const container = document.getElementById('qualityChart');
+            container.innerHTML = '';
+
+            const maxBandwidth = calculateBandwidth(watchHours.days30, 11250); // 4K as max
+
+            qualityPresets.forEach(preset => {
+                const bandwidth = calculateBandwidth(watchHours.days30, preset.mbPerHour);
+                const percentage = (bandwidth / maxBandwidth) * 100;
+                const isCurrent = preset.mbPerHour === currentVideoSize;
+
+                const barRow = document.createElement('div');
+                barRow.className = 'bar-row';
+                barRow.innerHTML = `
+                    <div class="bar-label">${preset.name}${isCurrent ? ' ★' : ''}</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: ${percentage}%">${formatNumber(bandwidth)} TB</div>
+                    </div>
+                `;
+                container.appendChild(barRow);
+            });
+        }
+
+        // Event listeners
+        document.getElementById('videoSize').addEventListener('input', (e) => {
+            currentVideoSize = parseInt(e.target.value);
+            document.getElementById('videoSizeValue').textContent = currentVideoSize + ' MB/hr';
+            
+            // Update quality button states
+            document.querySelectorAll('.quality-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.size) === currentVideoSize) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            updateCalculations();
+        });
+
+        document.getElementById('growthMultiplier').addEventListener('input', (e) => {
+            currentGrowthMultiplier = parseFloat(e.target.value);
+            document.getElementById('growthValue').textContent = formatNumber(currentGrowthMultiplier, 1) + '×';
+            updateCalculations();
+        });
+
+        // Quality preset buttons
+        document.querySelectorAll('.quality-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const size = parseInt(btn.dataset.size);
+                currentVideoSize = size;
+                document.getElementById('videoSize').value = size;
+                document.getElementById('videoSizeValue').textContent = size + ' MB/hr';
+                
+                document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                updateCalculations();
+            });
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tabName + 'Tab').classList.add('active');
+            });
+        });
+
+        // Initial calculation
+        updateCalculations();
+    </script>
+</body>
+</html>
