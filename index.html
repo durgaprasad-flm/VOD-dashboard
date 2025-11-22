@@ -528,7 +528,7 @@
     <div class="container">
         <div class="header">
             <h1>🎬 VOD Bandwidth & Cost Calculator</h1>
-            <p>Durga Prasad (FLM)</p>
+            <p>By Durga Prasad (FLM)</p>
         </div>
 
         <div class="main-layout">
@@ -690,11 +690,17 @@
 
         <div class="comparison-section" style="margin-top: 30px;">
             <h2>Platform Cost Comparison (Current Scale)</h2>
+            <div style="margin-bottom: 15px; padding: 12px; background: rgba(var(--color-teal-500-rgb), 0.1); border-radius: 8px; border-left: 3px solid var(--color-teal-500);">
+                <strong style="color: var(--color-teal-500);">Bandwidth: </strong>
+                <span id="currentBandwidthDisplay" style="font-weight: 600; font-size: 16px;">14.28 TB</span>
+            </div>
             <table class="cost-table">
                 <thead>
                     <tr>
                         <th>Platform</th>
                         <th>Plan Details</th>
+                        <th>Base Cost</th>
+                        <th>Overage Cost</th>
                         <th>Monthly Cost</th>
                         <th>Annual Cost</th>
                     </tr>
@@ -710,11 +716,17 @@
 
         <div class="comparison-section" style="margin-top: 30px; display: none;" id="futureCostSection">
             <h2>Platform Cost Comparison (Future Scale)</h2>
+            <div style="margin-bottom: 15px; padding: 12px; background: rgba(var(--color-teal-500-rgb), 0.1); border-radius: 8px; border-left: 3px solid var(--color-teal-500);">
+                <strong style="color: var(--color-teal-500);">Bandwidth: </strong>
+                <span id="futureBandwidthDisplay" style="font-weight: 600; font-size: 16px;">42.83 TB</span>
+            </div>
             <table class="cost-table">
                 <thead>
                     <tr>
                         <th>Platform</th>
                         <th>Plan Details</th>
+                        <th>Base Cost</th>
+                        <th>Overage Cost</th>
                         <th>Monthly Cost</th>
                         <th>Annual Cost</th>
                     </tr>
@@ -744,7 +756,7 @@
         const platforms = [
             {
                 name: 'Gumlet',
-                tier: 'Tier 1',
+                tier: 'VOD plan 1',
                 type: 'gumlet',
                 fixedMonthly: 1300,
                 includedBandwidthTB: 20,
@@ -753,37 +765,37 @@
             },
             {
                 name: 'Gumlet',
-                tier: 'Tier 2',
+                tier: 'VOD pan 2',
                 type: 'gumlet',
                 fixedMonthly: 2300,
                 includedBandwidthTB: 60,
                 includedCostPerGB: 0.03,
                 payAsYouGoCostPerGB: 0.025
             },
-            {
-                name: 'VdoCipher',
-                tier: '10 TB Plan',
-                type: 'vdocipher',
-                annualCost: 800,
-                bandwidthTB: 10,
-                costPerGB: 0.08
-            },
-            {
-                name: 'VdoCipher',
-                tier: '25 TB Plan',
-                type: 'vdocipher',
-                annualCost: 2000,
-                bandwidthTB: 25,
-                costPerGB: 0.08
-            },
-            {
-                name: 'VdoCipher',
-                tier: '50 TB Plan',
-                type: 'vdocipher',
-                annualCost: 3500,
-                bandwidthTB: 50,
-                costPerGB: 0.07
-            },
+            // {
+            //     name: 'VdoCipher',
+            //     tier: '10 TB Plan',
+            //     type: 'vdocipher',
+            //     annualCost: 800,
+            //     bandwidthTB: 10,
+            //     costPerGB: 0.08
+            // },
+            // {
+            //     name: 'VdoCipher',
+            //     tier: '25 TB Plan',
+            //     type: 'vdocipher',
+            //     annualCost: 2000,
+            //     bandwidthTB: 25,
+            //     costPerGB: 0.08
+            // },
+            // {
+            //     name: 'VdoCipher',
+            //     tier: '50 TB Plan',
+            //     type: 'vdocipher',
+            //     annualCost: 3500,
+            //     bandwidthTB: 50,
+            //     costPerGB: 0.07
+            // },
             {
                 name: 'VdoCipher',
                 tier: '100 TB Plan',
@@ -808,18 +820,6 @@
                 bandwidthTB: 500,
                 costPerGB: 0.04
             },
-            {
-                name: 'Vimeo',
-                tier: 'Base Plan',
-                type: 'vimeo',
-                costPerTB: 80
-            },
-            {
-                name: 'Vimeo',
-                tier: 'Overage',
-                type: 'vimeo',
-                costPerTB: 120
-            }
         ];
 
         let currentVideoSize = 200;
@@ -844,54 +844,78 @@
             let monthlyCost = 0;
             let planDetails = '';
 
+            let baseCost = 0;
+            let overageCost = 0;
+            
             if (platform.type === 'gumlet') {
-                // Always apply optimization to bandwidth for Gumlet (38.78% average reduction)
-                const effectiveBandwidthTB = calculateOptimizedBandwidth(monthlyBandwidthTB);
+                // Gumlet: Calculate cost based on annual bandwidth (year-wise like VdoCipher)
+                const annualBandwidthTB = monthlyBandwidthTB * 12;
+                // Use original bandwidth without optimization
+                const effectiveAnnualBandwidthTB = annualBandwidthTB;
                 
-                monthlyCost = platform.fixedMonthly;
-                const effectiveBandwidthGB = effectiveBandwidthTB * 1024;
-                const includedBandwidthGB = platform.includedBandwidthTB * 1024;
+                // Annual included bandwidth (monthly * 12)
+                const annualIncludedBandwidthTB = platform.includedBandwidthTB * 12;
+                const annualIncludedBandwidthGB = annualIncludedBandwidthTB * 1024;
+                const effectiveAnnualBandwidthGB = effectiveAnnualBandwidthTB * 1024;
                 
-                if (effectiveBandwidthGB <= includedBandwidthGB) {
+                // Annual fixed cost
+                const annualFixedCost = platform.fixedMonthly * 12;
+                
+                if (effectiveAnnualBandwidthTB <= annualIncludedBandwidthTB) {
                     // Within included bandwidth
-                    const includedCost = effectiveBandwidthGB * platform.includedCostPerGB;
-                    monthlyCost += includedCost;
-                    planDetails = `Fixed: $${platform.fixedMonthly.toFixed(0)} + ${formatNumber(effectiveBandwidthTB, 2)} TB @ $${platform.includedCostPerGB.toFixed(2)}/GB`;
+                    const includedCost = effectiveAnnualBandwidthGB * platform.includedCostPerGB;
+                    const totalAnnualCost = annualFixedCost + includedCost;
+                    monthlyCost = totalAnnualCost / 12;
+                    baseCost = annualFixedCost / 12;
+                    overageCost = 0;
+                    planDetails = `Fixed: $${platform.fixedMonthly.toFixed(0)}/month + ${formatNumber(effectiveAnnualBandwidthTB, 2)} TB/year @ $${platform.includedCostPerGB.toFixed(2)}/GB`;
                 } else {
                     // Exceeds included bandwidth
-                    const includedCost = includedBandwidthGB * platform.includedCostPerGB;
-                    const overageGB = effectiveBandwidthGB - includedBandwidthGB;
-                    const overageCost = overageGB * platform.payAsYouGoCostPerGB;
-                    monthlyCost += includedCost + overageCost;
-                    planDetails = `Fixed: $${platform.fixedMonthly.toFixed(0)} + ${platform.includedBandwidthTB}TB included + ${formatNumber((overageGB / 1024), 2)} TB overage @ $${platform.payAsYouGoCostPerGB.toFixed(3)}/GB`;
+                    const includedCost = annualIncludedBandwidthGB * platform.includedCostPerGB;
+                    const overageGB = effectiveAnnualBandwidthGB - annualIncludedBandwidthGB;
+                    const overageCostAnnual = overageGB * platform.payAsYouGoCostPerGB;
+                    const totalAnnualCost = annualFixedCost + includedCost + overageCostAnnual;
+                    monthlyCost = totalAnnualCost / 12;
+                    baseCost = (annualFixedCost + includedCost) / 12;
+                    overageCost = overageCostAnnual / 12;
+                    planDetails = `Fixed: $${platform.fixedMonthly.toFixed(0)}/month + ${annualIncludedBandwidthTB}TB/year included + ${formatNumber((overageGB / 1024), 2)} TB/year overage @ $${platform.payAsYouGoCostPerGB.toFixed(3)}/GB`;
                 }
-                
-                planDetails += ` (Optimized: ${GUMLET_OPTIMIZATION_PERCENT.toFixed(2)}% reduction)`;
             } else if (platform.type === 'vdocipher') {
-                // VdoCipher: Calculate cost based on plan
+                // VdoCipher: Calculate cost based on plan with overage charges
                 const annualBandwidthTB = monthlyBandwidthTB * 12;
+                const overageRatePerGB = 0.07; // $0.07/GB for overage
                 
                 if (annualBandwidthTB <= platform.bandwidthTB) {
-                    // Within plan - use plan cost
+                    // Within plan - use plan cost only
                     monthlyCost = platform.annualCost / 12;
+                    baseCost = monthlyCost;
+                    overageCost = 0;
                     planDetails = `${platform.bandwidthTB} TB/year plan (using ${formatNumber(annualBandwidthTB, 2)} TB)`;
                 } else {
-                    // Exceeds plan - calculate based on actual usage at plan rate
-                    monthlyCost = (annualBandwidthTB * 1024 * platform.costPerGB) / 12;
-                    planDetails = `${formatNumber(annualBandwidthTB, 2)} TB/year @ $${platform.costPerGB.toFixed(2)}/GB (exceeds ${platform.bandwidthTB} TB plan)`;
+                    // Exceeds plan - plan cost + overage charges
+                    const planMonthlyCost = platform.annualCost / 12;
+                    const overageTB = annualBandwidthTB - platform.bandwidthTB;
+                    const overageGB = overageTB * 1024;
+                    const overageCostAnnual = overageGB * overageRatePerGB;
+                    const overageCostMonthly = overageCostAnnual / 12;
+                    
+                    monthlyCost = planMonthlyCost + overageCostMonthly;
+                    baseCost = planMonthlyCost;
+                    overageCost = overageCostMonthly;
+                    planDetails = `${platform.bandwidthTB} TB/year plan + ${formatNumber(overageTB, 2)} TB/year overage @ $${overageRatePerGB.toFixed(2)}/GB`;
                 }
-            } else if (platform.type === 'vimeo') {
-                // Vimeo: Simple per-TB pricing
-                monthlyCost = monthlyBandwidthTB * platform.costPerTB;
-                planDetails = `$${platform.costPerTB}/TB`;
             }
 
             return {
                 monthly: monthlyCost,
                 annual: monthlyCost * 12,
-                details: planDetails
+                details: planDetails,
+                baseCost: baseCost,
+                overageCost: overageCost,
+                bandwidthTB: monthlyBandwidthTB
             };
         }
+
 
         // Format number with commas and decimals
         function formatNumber(num, decimals = 2) {
@@ -938,9 +962,9 @@
             });
             document.getElementById('growthScenario').textContent = formatNumber(currentGrowthMultiplier, 1) + '×';
 
-            // Update CDN cost tables
-            updateCDNTable(bandwidthYear, 'cdnCostTable');
-            updateCDNTable(futureBandwidthYear, 'futureCdnCostTable');
+            // Update CDN cost tables - use 30-day bandwidth for calculations
+            updateCDNTable(bandwidth30, 'cdnCostTable');
+            updateCDNTable(futureBandwidth30, 'futureCdnCostTable');
 
             // Update quality comparison
             updateQualityComparison();
@@ -948,18 +972,26 @@
         }
 
         // Update platform cost table
-        function updateCDNTable(annualTB, tableId) {
+        // Note: bandwidth30DayTB is the 30-day bandwidth value (e.g., 14.28 TB)
+        function updateCDNTable(bandwidth30DayTB, tableId) {
             const tbody = document.getElementById(tableId);
             tbody.innerHTML = '';
 
-            const monthlyTB = annualTB / 12;
+            // Use 30-day bandwidth directly as monthly bandwidth for cost calculations
+            const monthlyTB = bandwidth30DayTB;
+            const annualTB = monthlyTB * 12;
             const costs = [];
 
             platforms.forEach(platform => {
                 const costData = calculatePlatformCost(platform, monthlyTB);
                 costs.push({
                     platform: platform,
-                    cost: costData,
+                    cost: {
+                        ...costData,
+                        baseCost: costData.baseCost || 0,
+                        overageCost: costData.overageCost || 0,
+                        bandwidthTB: costData.bandwidthTB || monthlyTB
+                    },
                     displayName: `${platform.name}${platform.tier ? ' - ' + platform.tier : ''}`
                 });
             });
@@ -971,14 +1003,33 @@
             const bestCost = costs[0].cost.annual;
             const worstCost = costs[costs.length - 1].cost.annual;
 
+            // Update bandwidth display at top of table (show both 30-day and yearly)
+            if (tableId === 'cdnCostTable') {
+                const bandwidthDisplayEl = document.getElementById('currentBandwidthDisplay');
+                if (bandwidthDisplayEl) {
+                    bandwidthDisplayEl.innerHTML = `<span style="margin-right: 20px;"><strong>30-Day:</strong> ${formatNumber(monthlyTB, 2)} TB</span><span><strong>Yearly:</strong> ${formatNumber(annualTB, 2)} TB</span>`;
+                }
+            } else if (tableId === 'futureCdnCostTable') {
+                const bandwidthDisplayEl = document.getElementById('futureBandwidthDisplay');
+                if (bandwidthDisplayEl) {
+                    bandwidthDisplayEl.innerHTML = `<span style="margin-right: 20px;"><strong>30-Day:</strong> ${formatNumber(monthlyTB, 2)} TB</span><span><strong>Yearly:</strong> ${formatNumber(annualTB, 2)} TB</span>`;
+                }
+            }
+
             costs.forEach((item, index) => {
                 const row = document.createElement('tr');
                 const isBest = item.cost.annual === bestCost && index === 0;
                 const isWorst = item.cost.annual === worstCost && index === costs.length - 1;
+                
+                // Format base and overage costs
+                const baseCostDisplay = item.cost.baseCost > 0 ? `$${formatNumber(item.cost.baseCost)}` : '-';
+                const overageCostDisplay = item.cost.overageCost > 0 ? `$${formatNumber(item.cost.overageCost)}` : '-';
 
                 row.innerHTML = `
                     <td class="${isBest ? 'cdn-best' : isWorst ? 'cdn-worst' : ''}">${item.displayName}</td>
                     <td style="font-size: 12px;">${item.cost.details}</td>
+                    <td>${baseCostDisplay}</td>
+                    <td>${overageCostDisplay}</td>
                     <td>$${formatNumber(item.cost.monthly)}</td>
                     <td>$${formatNumber(item.cost.annual)}</td>
                 `;
