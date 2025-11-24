@@ -703,6 +703,8 @@
                         <th>Overage Cost</th>
                         <th>Monthly Cost</th>
                         <th>Annual Cost</th>
+                        <th>Monthly Cost (₹)</th>
+                        <th>Annual Cost (₹)</th>
                     </tr>
                 </thead>
                 <tbody id="cdnCostTable">
@@ -729,6 +731,8 @@
                         <th>Overage Cost</th>
                         <th>Monthly Cost</th>
                         <th>Annual Cost</th>
+                        <th>Monthly Cost (₹)</th>
+                        <th>Annual Cost (₹)</th>
                     </tr>
                 </thead>
                 <tbody id="futureCdnCostTable">
@@ -922,6 +926,11 @@
             return num.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
+        // Format INR currency
+        function formatINR(amount) {
+            return '₹' + formatNumber(amount, 0);
+        }
+
 
         // Update all calculations
         function updateCalculations() {
@@ -1025,6 +1034,12 @@
                 const baseCostDisplay = item.cost.baseCost > 0 ? `$${formatNumber(item.cost.baseCost)}` : '-';
                 const overageCostDisplay = item.cost.overageCost > 0 ? `$${formatNumber(item.cost.overageCost)}` : '-';
 
+                // Calculate INR costs (multiply USD by 90)
+                const monthlyUSD = parseFloat(item.cost.monthly) || 0;
+                const annualUSD = parseFloat(item.cost.annual) || 0;
+                const monthlyINR = monthlyUSD * 90;
+                const annualINR = annualUSD * 90;
+
                 row.innerHTML = `
                     <td class="${isBest ? 'cdn-best' : isWorst ? 'cdn-worst' : ''}">${item.displayName}</td>
                     <td style="font-size: 12px;">${item.cost.details}</td>
@@ -1032,6 +1047,8 @@
                     <td>${overageCostDisplay}</td>
                     <td>$${formatNumber(item.cost.monthly)}</td>
                     <td>$${formatNumber(item.cost.annual)}</td>
+                    <td style="font-weight: 600;">${formatINR(monthlyINR)}</td>
+                    <td style="font-weight: 600;">${formatINR(annualINR)}</td>
                 `;
                 tbody.appendChild(row);
             });
